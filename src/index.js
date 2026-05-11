@@ -3,7 +3,7 @@
  *
  * 1. Install Node.js 20.11 or newer.
  * 2. Run `npm install` to install discord.js.
- * 3. Copy `.env.example` to `.env` and fill in:
+ * 3. Run `npm run setup` to create a private `.env` file, then fill in:
  *    - DISCORD_TOKEN: your Discord bot token.
  *    - CHANNEL_ID: the reward channel to listen in.
  *    - LUVI_BOT_ID: the specific Luvi bot user ID to process.
@@ -11,6 +11,8 @@
  *    - DATA_FILE: optional, defaults to ./data/points.json.
  * 4. Enable the Message Content Intent in the Discord Developer Portal.
  * 5. Run `npm start` (`.env` is loaded automatically when it exists).
+ *
+ * Keep real tokens only in `.env` or deployment secrets. Never commit them.
  */
 
 import {

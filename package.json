@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "start": "node --env-file-if-exists=.env src/index.js",
-    "check": "node --check src/index.js"
+    "setup": "node scripts/create-env.js",
+    "check": "node --check src/index.js && node --check scripts/create-env.js"
   },
   "engines": {
     "node": ">=20.11.0"
