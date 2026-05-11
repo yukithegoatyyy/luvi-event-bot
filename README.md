@@ -16,7 +16,7 @@ A Discord bot built with Node.js and `discord.js` v14 that watches one channel f
    This creates `.env` from `.env.example`. Put your real token only in `.env`; `.env` is ignored by git and must stay secret.
 
    Required values:
-   - `DISCORD_TOKEN` or `APIKEY`: your Discord bot token. Use `APIKEY` if that is the secret name your repo/host already provides.
+   - `APIKEY`: your Discord bot token. `DISCORD_TOKEN` also works, but `APIKEY` is the primary name used by this repo.
    - `CHANNEL_ID`: the Discord channel ID where reward messages appear.
    - `LUVI_BOT_ID`: the Luvi bot's user ID.
    Optional values:
@@ -31,20 +31,20 @@ A Discord bot built with Node.js and `discord.js` v14 that watches one channel f
    npm start
    ```
 
-   `npm start` automatically loads `.env` when it exists. For hosted deployments, set `APIKEY` (or `DISCORD_TOKEN`) plus the same channel/user ID names as platform secrets/environment variables instead of committing a `.env` file.
+   `npm start` automatically loads `.env` when it exists. For hosted deployments, you do not need an `.env` file; set `APIKEY`, `CHANNEL_ID`, and `LUVI_BOT_ID` as platform secrets/environment variables instead.
 
 ## Keeping your token secret
 
 - Do **not** edit `.env.example` with a real token; it is committed documentation only.
-- Put your real `DISCORD_TOKEN` (or `APIKEY`), `CHANNEL_ID`, and `LUVI_BOT_ID` in the untracked `.env` file created by `npm run setup`.
-- If you deploy the bot, add `APIKEY` (or `DISCORD_TOKEN`), `CHANNEL_ID`, and `LUVI_BOT_ID` as your host's secret/environment variables.
+- For local testing, put your real `APIKEY`, `CHANNEL_ID`, and `LUVI_BOT_ID` in the untracked `.env` file created by `npm run setup`.
+- If you deploy the bot, add `APIKEY`, `CHANNEL_ID`, and `LUVI_BOT_ID` as your host's secret/environment variables; no `.env` file is required on the host.
 - If a token is ever committed or shared, reset it immediately in the Discord Developer Portal.
 
 ## Hosting / going live
 
 The bot is ready to host once these secrets/environment variables are set on your host:
 
-- `APIKEY` (or `DISCORD_TOKEN`) - your Discord bot token.
+- `APIKEY` - your Discord bot token. This repo reads `process.env.APIKEY`, so a host/repo secret named `APIKEY` will not cause a problem. (`DISCORD_TOKEN` is still accepted as a fallback.)
 - `CHANNEL_ID` - the channel the bot should watch.
 - `LUVI_BOT_ID` - the Luvi bot user ID to trust.
 - Optional: `GUILD_ID` for fast slash-command registration in one server.

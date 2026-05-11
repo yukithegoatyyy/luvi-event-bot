@@ -4,7 +4,7 @@
  * 1. Install Node.js 20.11 or newer.
  * 2. Run `npm install` to install discord.js.
  * 3. Run `npm run setup` to create a private `.env` file, then fill in:
- *    - DISCORD_TOKEN or APIKEY: your Discord bot token.
+ *    - APIKEY: your Discord bot token. DISCORD_TOKEN also works as a fallback.
  *    - CHANNEL_ID: the reward channel to listen in.
  *    - LUVI_BOT_ID: the specific Luvi bot user ID to process.
  *    - GUILD_ID: optional, for fast guild-only slash command registration.
