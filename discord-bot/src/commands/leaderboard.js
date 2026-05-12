@@ -24,29 +24,32 @@ export async function execute(interaction) {
   }
 
   const top10 = all.slice(0, 10);
-  const podiumEmoji = ['🥇', '🥈', '🥉'];
+  const medals = ['🥇', '🥈', '🥉'];
 
   const podiumLines = top10.slice(0, 3).map((u, i) =>
-    `${podiumEmoji[i]} <@${u.id}>\n${u.points} pts`,
+    `${medals[i]} <@${u.id}> — **${u.points} pts**`,
   );
 
   const restLines = top10.slice(3).map((u, i) =>
-    `**${i + 4}.** <@${u.id}> — ${u.points} pts`,
+    `\`${i + 4}.\` <@${u.id}> — ${u.points} pts`,
   );
+
+  const separator = '─────────────────────';
+  const description = [
+    podiumLines.join('\n'),
+    restLines.length > 0 ? `${separator}\n${restLines.join('\n')}` : '',
+  ]
+    .filter(Boolean)
+    .join('\n');
 
   const embed = new EmbedBuilder()
     .setTitle('🏆 Luvi Gift Leaderboard')
     .setColor(0xffd700)
-    .addFields(
-      { name: '\u200b', value: podiumLines.join('\n\n') },
-    )
+    .setDescription(description)
     .setFooter({
-      text: `Points awarded for gold, card rarity & cores • /addpoints to update | ${all.length} player${all.length === 1 ? '' : 's'} total`,
-    });
-
-  if (restLines.length > 0) {
-    embed.addFields({ name: '\u200b', value: restLines.join('\n') });
-  }
+      text: `👥 ${all.length} player${all.length === 1 ? '' : 's'} • Points awarded for gold, card rarity & cores`,
+    })
+    .setTimestamp();
 
   await interaction.reply({ embeds: [embed] });
 }
