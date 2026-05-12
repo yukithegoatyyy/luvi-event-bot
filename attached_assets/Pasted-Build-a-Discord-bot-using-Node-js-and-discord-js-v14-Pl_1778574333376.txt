@@ -1,0 +1,119 @@
+Build a Discord bot using Node.js and discord.js v14. Place all files inside a folder called `discord-bot/` with this structure:
+
+discord-bot/
+├── package.json
+├── data/
+│   └── points.json        ← starts as { "users": {}, "processedMessages": [] }
+└── src/
+    ├── bot.js
+    ├── config.js
+    ├── deployCommands.js
+    ├── parseReward.js
+    ├── pointsStore.js
+    └── commands/
+        ├── addpoints.js
+        ├── removepoints.js
+        └── leaderboard.js
+
+---
+
+ENVIRONMENT VARIABLES (read from process.env):
+- DISCORD_BOT_TOKEN
+- DISCORD_CLIENT_ID
+- DISCORD_GUILD_ID
+- DISCORD_CHANNEL_ID   ← only channel to watch for Luvi messages
+- LUVI_BOT_ID          ← bot ID whose messages trigger point tracking
+
+ALLOWED_ROLE_IDS = ["1296831373599965296", "1472643080908963970"]
+These are the only roles that can use any command (text or slash).
+
+---
+
+POINTS SYSTEM:
+
+Gold (matched from embed text "**NUMBER** Gold"):
+  100–199 → 1 pt, 200–299 → 2 pts, 300–399 → 3 pts, 400–500 → 4 pts
+
+Card rarity (matched from embed text):
+  Common → 1 pt, Rare → 1 pt, Exotic → 2 pts, Legendary → 4 pts
+  (No Ethereal option)
+
+Core (only if "core received/got/earned" appears, NOT just a % chance):
+  +5 pts
+
+---
+
+HOW REWARD DETECTION WORKS:
+
+- Bot watches DISCORD_CHANNEL_ID for messages from LUVI_BOT_ID only
+- Luvi sends embeds, not plain text — extract text from: embed.title, embed.description, all embed.fields (name + value)
+- Combine plain message content + all embed text into one string to search
+- A message is a reward if it contains a gold amount AND (a card rarity OR confirmed core)
+- The user who gets the points is found via <@USER_ID> mention in the embed text
+- Each message ID is stored in processedMessages array to prevent duplicate counting
+- Keep processedMessages capped at 10,000 entries
+- When points are awarded, post a public confirmation in the same channel:
+  "🎁 @User earned +X points (⭐ Gold 258, 🃏 Rare card)! Total: Y pts"
+
+---
+
+PERSISTENT STORAGE (data/points.json):
+
+{
+  "users": {
+    "USER_ID": { "points": 42, "username": "Alice" }
+  },
+  "processedMessages": ["msg_id_1", ...]
+}
+
+Write atomically: write to .tmp file then rename to avoid corruption.
+addPoints() supports negative values (for removepoints).
+Points never go below 0.
+
+---
+
+SLASH COMMANDS (guild-scoped, registered on bot startup via REST API):
+
+/leaderboard
+- Staff only (check ALLOWED_ROLE_IDS)
+- Shows a gold-colored Discord embed (#FFD700)
+- Top 3 shown as podium with 🥇🥈🥉, mention, and points on separate line
+- Ranks 4–10 shown as compact numbered list
+- Footer: "Points awarded for gold, card rarity & cores • /addpoints to update"
+- Include total player count
+
+/addpoints user:@User gold:258 card:Rare core:True
+- Staff only (check ALLOWED_ROLE_IDS)
+- Options: user (required), gold (optional integer ≥0), card (optional choice: Common/Rare/Exotic/Legendary), core (optional boolean)
+- Calculates points from inputs, adds them, replies with breakdown + new total
+- If total new points would be 0, reply with a warning
+
+/removepoints user:@User amount:5
+- Staff only (check ALLOWED_ROLE_IDS)
+- Deducts points, clamps at 0 (never negative)
+- If user has no points, reply with error
+- Shows note if capped
+
+---
+
+TEXT COMMANDS (prefix !, any channel, staff roles only — silently ignore non-staff):
+
+!leaderboard     → top 10 users, formatted nicely
+!allpoints       → ALL users sorted by points, split into chunks if >1900 chars
+!points          → caller's own point total
+!points @user    → another user's total
+!addpoints @user 5    → manually add exact points (staff only)
+!removepoints @user 3 → manually remove exact points, clamped at 0 (staff only)
+!commands        → list all commands
+
+---
+
+START COMMAND: node src/bot.js
+
+On startup:
+1. Load all files from commands/ into a discord.js Collection
+2. Register slash commands via REST API (guild-scoped = instant)
+3. Log in and print bot tag + channel + Luvi bot ID
+
+Required intents: Guilds, GuildMessages, MessageContent
+MessageContent is a privileged intent — must be enabled in Discord Developer Portal.

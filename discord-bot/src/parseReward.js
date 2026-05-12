@@ -1,0 +1,83 @@
+function getGoldPoints(amount) {
+  if (amount >= 100 && amount <= 199) return 1;
+  if (amount >= 200 && amount <= 299) return 2;
+  if (amount >= 300 && amount <= 399) return 3;
+  if (amount >= 400 && amount <= 500) return 4;
+  return 0;
+}
+
+function getCardPoints(rarity) {
+  switch (rarity?.toLowerCase()) {
+    case 'common':
+    case 'rare':
+      return 1;
+    case 'exotic':
+      return 2;
+    case 'legendary':
+      return 4;
+    default:
+      return 0;
+  }
+}
+
+export function extractEmbedText(message) {
+  const parts = [message.content ?? ''];
+
+  for (const embed of message.embeds) {
+    if (embed.title) parts.push(embed.title);
+    if (embed.description) parts.push(embed.description);
+    for (const field of embed.fields ?? []) {
+      if (field.name) parts.push(field.name);
+      if (field.value) parts.push(field.value);
+    }
+  }
+
+  return parts.join('\n');
+}
+
+export function parseReward(text) {
+  const goldMatch = text.match(/\*\*(\d[\d,]*)\*\*\s*Gold/i);
+  const rarityMatch = text.match(/\b(Common|Rare|Exotic|Legendary)\b/i);
+
+  const mentionsCore = /\bcore\b/i.test(text);
+  const coreConfirmed = /\b(?:received|got|earned)\b.*\bcore\b|\bcore\b.*\b(?:received|got|earned)\b/i.test(text);
+  const coreReceived = mentionsCore && coreConfirmed;
+
+  const goldAmount = goldMatch ? Number.parseInt(goldMatch[1].replaceAll(',', ''), 10) : 0;
+  const cardRarity = rarityMatch?.[1] ?? null;
+
+  const goldPoints = getGoldPoints(goldAmount);
+  const cardPoints = getCardPoints(cardRarity);
+  const corePoints = coreReceived ? 5 : 0;
+  const totalPoints = goldPoints + cardPoints + corePoints;
+
+  const isReward = goldAmount > 0 && (cardRarity !== null || coreReceived);
+
+  return {
+    isReward,
+    goldAmount,
+    goldPoints,
+    cardRarity,
+    cardPoints,
+    coreReceived,
+    corePoints,
+    totalPoints,
+  };
+}
+
+export function extractMentionedUserId(text) {
+  return text.match(/<@!?(\d{17,20})>/)?.[1] ?? null;
+}
+
+export function formatConfirmation(userId, reward, newTotal) {
+  const parts = [];
+  if (reward.goldAmount > 0) parts.push(`⭐ Gold ${reward.goldAmount}`);
+  if (reward.cardRarity) parts.push(`🃏 ${reward.cardRarity} card`);
+  if (reward.coreReceived) parts.push('💎 Core');
+  const breakdown = parts.length ? ` (${parts.join(', ')})` : '';
+  return `🎁 <@${userId}> earned **+${reward.totalPoints} points**${breakdown}! Total: **${newTotal} pts**`;
+}
+
+export function calcPointsFromInputs({ gold = 0, card = null, core = false }) {
+  return getGoldPoints(gold) + getCardPoints(card) + (core ? 5 : 0);
+}
