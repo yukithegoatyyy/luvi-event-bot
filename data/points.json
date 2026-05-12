@@ -1,1 +1,17 @@
-{"users":{},"processedMessages":[]}
+{
+  "users": {
+    "861971757396787230": {
+      "points": 1,
+      "username": "bleak.zero"
+    },
+    "811520301631930368": {
+      "points": 4,
+      "username": "aoadii"
+    },
+    "1107580940294819872": {
+      "points": 5,
+      "username": "imspudermon"
+    }
+  },
+  "processedMessages": []
+}
