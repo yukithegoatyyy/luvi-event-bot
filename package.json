@@ -1,6 +1,6 @@
 {
   "name": "luvi-event-bot",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Discord bot that tracks Luvi gift reward points with slash and text commands.",
   "main": "src/bot.js",
   "type": "module",

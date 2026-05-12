@@ -5,7 +5,6 @@ const commands = [
   new SlashCommandBuilder()
     .setName('leaderboard')
     .setDescription('Show the top 10 Luvi gift reward point totals.'),
-
   new SlashCommandBuilder()
     .setName('addpoints')
     .setDescription('Manually add points to a user based on reward inputs.')
@@ -29,7 +28,6 @@ const commands = [
     .addBooleanOption((opt) =>
       opt.setName('core').setDescription('Was a core received?'),
     ),
-
   new SlashCommandBuilder()
     .setName('removepoints')
     .setDescription('Remove points from a user.')
@@ -43,8 +41,9 @@ const commands = [
 
 export async function deployCommands() {
   const rest = new REST({ version: '10' }).setToken(DISCORD_BOT_TOKEN);
-  await rest.put(Routes.applicationGuildCommands(DISCORD_CLIENT_ID, DISCORD_GUILD_ID), {
-    body: commands,
-  });
-  console.log(`Registered ${commands.length} slash commands for guild ${DISCORD_GUILD_ID}.`);
+  const route = DISCORD_GUILD_ID
+    ? Routes.applicationGuildCommands(DISCORD_CLIENT_ID, DISCORD_GUILD_ID)
+    : Routes.applicationCommands(DISCORD_CLIENT_ID);
+  await rest.put(route, { body: commands });
+  console.log(`Registered ${commands.length} slash commands.`);
 }

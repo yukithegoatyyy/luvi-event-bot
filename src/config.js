@@ -14,7 +14,6 @@ export const DATA_FILE = process.env.DATA_FILE ?? './data/points.json';
 const required = {
   DISCORD_BOT_TOKEN,
   DISCORD_CLIENT_ID,
-  DISCORD_GUILD_ID,
   DISCORD_CHANNEL_ID,
   LUVI_BOT_ID,
 };
