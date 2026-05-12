@@ -16,7 +16,7 @@ export async function execute(interaction) {
     return;
   }
 
-  const all = getAllUsers();
+  const all = getAllUsers().filter((u) => u.points > 0);
 
   if (all.length === 0) {
     await interaction.reply({ content: 'No points have been recorded yet.', flags: MessageFlags.Ephemeral });
@@ -47,7 +47,7 @@ export async function execute(interaction) {
     .setColor(0xffd700)
     .setDescription(description)
     .setFooter({
-      text: `👥 ${all.length} player${all.length === 1 ? '' : 's'} • Points awarded for gold, card rarity & cores`,
+      text: `👥 ${all.length} player${all.length === 1 ? '' : 's'} • Points for gold, card rarity & cores`,
     })
     .setTimestamp();
 

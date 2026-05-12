@@ -30,20 +30,23 @@ export function extractEmbedText(message) {
       if (field.name) parts.push(field.name);
       if (field.value) parts.push(field.value);
     }
+    if (embed.footer?.text) parts.push(embed.footer.text);
   }
 
   return parts.join('\n');
 }
 
 export function parseReward(text) {
-  const goldMatch = text.match(/\*\*(\d[\d,]*)\*\*\s*Gold/i);
+  // Match **258** Gold, 258 Gold, Gold: 258, Gold 258 — all formats
+  const goldMatch = text.match(/(?:\*\*)?(\d[\d,]*)(?:\*\*)?\s*[Gg]old|[Gg]old[:\s]+(?:\*\*)?(\d[\d,]*)(?:\*\*)?/i);
   const rarityMatch = text.match(/\b(Common|Rare|Exotic|Legendary)\b/i);
 
   const mentionsCore = /\bcore\b/i.test(text);
-  const coreConfirmed = /\b(?:received|got|earned)\b.*\bcore\b|\bcore\b.*\b(?:received|got|earned)\b/i.test(text);
+  const coreConfirmed = /\b(?:received|got|earned|get)\b[^.!?\n]{0,30}\bcore\b|\bcore\b[^.!?\n]{0,30}\b(?:received|got|earned|get)\b/i.test(text);
   const coreReceived = mentionsCore && coreConfirmed;
 
-  const goldAmount = goldMatch ? Number.parseInt(goldMatch[1].replaceAll(',', ''), 10) : 0;
+  const rawGold = goldMatch?.[1] ?? goldMatch?.[2] ?? '0';
+  const goldAmount = Number.parseInt(rawGold.replaceAll(',', ''), 10);
   const cardRarity = rarityMatch?.[1] ?? null;
 
   const goldPoints = getGoldPoints(goldAmount);
@@ -72,10 +75,10 @@ export function extractMentionedUserId(text) {
 export function formatConfirmation(userId, reward, newTotal) {
   const parts = [];
   if (reward.goldAmount > 0) parts.push(`⭐ Gold ${reward.goldAmount}`);
-  if (reward.cardRarity) parts.push(`🃏 ${reward.cardRarity} card`);
+  if (reward.cardRarity) parts.push(`🃏 ${reward.cardRarity}`);
   if (reward.coreReceived) parts.push('💎 Core');
   const breakdown = parts.length ? ` (${parts.join(', ')})` : '';
-  return `🎁 <@${userId}> earned **+${reward.totalPoints} points**${breakdown}! Total: **${newTotal} pts**`;
+  return `🎁 <@${userId}> earned **+${reward.totalPoints} pts**${breakdown}! Total: **${newTotal} pts**`;
 }
 
 export function calcPointsFromInputs({ gold = 0, card = null, core = false }) {

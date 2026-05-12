@@ -23,7 +23,6 @@ import {
   addPoints,
   getAllUsers,
   saveStore,
-  setUsername,
 } from './pointsStore.js';
 import {
   extractEmbedText,
@@ -100,17 +99,7 @@ client.on(Events.MessageCreate, async (message) => {
     return;
   }
 
-  let username = userId;
-  try {
-    const member = await message.guild?.members.fetch(userId);
-    if (member) {
-      username = member.user.username;
-      setUsername(userId, username);
-    }
-  } catch {
-  }
-
-  const newTotal = addPoints(userId, username, reward.totalPoints);
+  const newTotal = addPoints(userId, userId, reward.totalPoints);
   markProcessed(message.id);
   await saveStore();
 
@@ -242,6 +231,14 @@ client.on(Events.InteractionCreate, async (interaction) => {
       await interaction.reply(reply);
     }
   }
+});
+
+process.on('unhandledRejection', (err) => {
+  console.error('Unhandled rejection:', err);
+});
+
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught exception:', err);
 });
 
 client.login(DISCORD_BOT_TOKEN);
